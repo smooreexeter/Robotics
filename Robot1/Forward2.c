@@ -2,20 +2,35 @@
 #pragma config(Motor,  port2,           rightMotor,    tmotorVex269_MC29, openLoop)
 
 task main(){
-rampUp(127);
 
 }
 
-void rampUp(int finSpeed){
-	int time = 10;
-	finSpeed = finSpeed-20;
+void move(int length, int dir){
 
-	for(int i = 1; i < time; i++){
-		motor[leftMotor] = i*finSpeed/time;
-		motor[rightMotor] = i*finSpeed/time;
-		wait1Msec(100);
-	//}
+	//dir controls direction. Positive value goes forward, negative value goes backwards.
+	//k is some constant which relates distance traveled to time in units of s/cm
+	float k = 1;
+	int time = length * k;
+	int speedl = sgn((float) dir) * 58;
+	int speedr = sgn((float) dir) * 46
 
-	motor[leftMotor] = finSpeed;
-	motor[rightMotor] = finSpeed;
+	motor[leftMotor] = speedl;
+	motor[rightMotor] = speedr;
+	wait1Msec(time);
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+
+}
+
+void turn90(int dir){
+
+	//change time depending on how long it actually takes to make a right turn;
+	//positive dir makes a right turn, negative makes a left turn;
+	int time = 2000;
+	int speed = sgn( (float) dir) * 60;
+
+	motor[leftMotor] = speed;
+	wait1Msec(time);
+	motor[leftMotor] = 0;
+
 }
