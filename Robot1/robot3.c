@@ -9,15 +9,39 @@ void wait(int len){
 	wait1Msec(len);
 }
 
+void rampUp(int length, int targetSpeed, float fac, int dir){
+	
+	if(length == 0){
+		length  = 30;
+	}
+	int time = length;
+	int speed = 20;
+	int interval = 5;
+	
+	while(speed < targetSpeed){
+		motor[leftMotor] = speed * sgn(dir);
+		motor[rightMotor] = speed * fac * sgn(dir);
+
+		speed += interval;
+		wait(time);
+	}
+	speed = targetSpeed;
+
+}
+
 void move(int length, int dir){
 
 	//dir controls direction. Positive value goes forward, negative value goes backwards.
 	//k is some constant which relates distance traveled to time in units of s/cm
-	float k = 20.243; //21.739
-	float b = 371.54;
+	length -= 9;
+	float k = 20.12; //21.739
+	float b = 365.78;
 	int time = length * k + b;
-	int speedl = 58;//sgn((float) dir) * 58;
-	int speedr = 46;//sgn((float) dir) * 46;
+	int speedl = sgn((float) dir) * 58;
+	int speedr = sgn((float) dir) * 46;
+	
+	rampUp(0,speedl, 0.7931, dir);
+	
 
 	motor[leftMotor] = speedl;
 	motor[rightMotor] = speedr;
@@ -28,30 +52,36 @@ void move(int length, int dir){
 	wait(1000);
 }
 
-void turn90(int dir){
+void turn90(int dir, int mult, bool waitVar){
 
-	//change time depending on how long it actually takes to make a right turn;
-	//positive dir makes a right turn, negative makes a left turn;
-	int time = 800;
-	int speedl = 58;//sgn((float) dir) * 58;
-	int speedr = 46;//sgn((float) dir) * 46;
-	
-	if(dir > 0){
-		motor[leftMotor] = speedl;
-		motor[rightMotor] = -speedr;
-		wait1Msec(time);
-		motor[leftMotor] = 0;
-		motor[rightMotor] = 0;
+	for(int i = 0; i < mult; i++){
+		//change time depending on how long it actually takes to make a right turn;
+		//positive dir makes a right turn, negative makes a left turn;
+		int time = 800;
+		int speedl = 58;//sgn((float) dir) * 58;
+		int speedr = 46;//sgn((float) dir) * 46;
+		
+		float tr = 1.5;
+		float tl = 0.9;
+		
+		if(dir > 0){
+			motor[leftMotor] = speedl;
+			motor[rightMotor] = -speedr;
+			wait1Msec(time*tr);
+			motor[leftMotor] = 0;
+			motor[rightMotor] = 0;
+		}
+		if(dir < 0){
+			motor[rightMotor] = speedr;
+			motor[leftMotor] = -speedl;
+			wait1Msec(time*tl);
+			motor[rightMotor] = 0;
+			motor[leftMotor] = 0;
+		}
+		if(waitVar){
+			wait(1000);
+		}
 	}
-	if(dir < 0){
-		motor[rightMotor] = speedr;
-		motor[leftMotor] = -speedl;
-		wait1Msec(time);
-		motor[rightMotor] = 0;
-		motor[leftMotor] = 0;
-	}
-
-	wait(1000);
 
 }
 
@@ -59,16 +89,29 @@ task main(){
 
 	while(SensorValue[button] == 0){}
 	
-	move(150, 1);
+	//turn90(1, 1);
+	//move(200, -1);
+	//move(200, 1);
+	//move(150, 1);
+	///*
+	move(200,1);
+	turn90(-1, 1, true);
+	move(250,1);
+	turn90(1, 2, true);
+	move(56, 1);
+	turn90(1, 3, true);
+	move(300, 1);
+	turn90(-1, 12, false);
+	//*/
 	/*
-	int time = 1500;
-	move(time, 1);
-	turn90(-1);
-	move(time, 1);
-	turn90(-1);
-	move(time, 1);
-	turn90(-1);
-	move(time, 1);
+	f 200
+	left 90
+	f 250
+	right 180
+	f 56
+	right 270
+	f 300
+	left 360
 	*/
 
 }
