@@ -93,28 +93,36 @@ void turn(int dir, int num){
 	
 }
 
-void goStraight(int dist){
+oid goStraight(int dist){
 	
 	float a = 5.7;
 	float k = .79;
 	//rampUp(0, 65, k, 1);
-	int R = 65*k;
+	int R = 40;
 	//float g = 1;
 	int RE = 0;
 	int LE = 0;
-	SensorValue[leftEncoder] = 10;
-	SensorValue[rightEncoder] = 10;
-	while(SensorValue[rightEncoder] < dist * a + 10){
-		motor[leftMotor] = 65;
+	
+	//SensorValue[leftEncoder] = 10;
+	//SensorValue[rightEncoder] = 10;
+	
+	while(SensorValue[rightEncoder] < dist * a  && SensorValue[leftEncoder] < dist * a){
+		
+		motor[leftMotor] = 40;
 		motor[rightMotor] = R;
 		LE = SensorValue[leftEncoder];
 		RE = SensorValue[rightEncoder];
-	  R = R * LE;
-	  R = R / RE;
-		wait(50);
+		//if(RE > 1){
+	  	R = R * (LE + 1) / (RE + 1);
+		//} else{
+		//	R = 40;
+		//}
+		wait(500);
+		
 	}
-	SensorValue[leftEncoder] = 0;
-	SensorValue[rightEncoder] = 0;
+	
+	//SensorValue[leftEncoder] = 0;
+	//SensorValue[rightEncoder] = 0;
 	motor[leftMotor] = 0;
 	motor[rightMotor] = 0;
 
