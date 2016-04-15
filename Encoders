@@ -120,6 +120,28 @@ void goStraight(int dist){
 
 }
 
+void goStraighter(int dist)
+{
+ while(SensorValue[rightencoder] < dist && SensorValue[leftencoder] < dist)
+{
+	while(SensorValue[rightencoder] == SensorValue[leftencoder] )
+	{
+		motor[right] = 50;
+		motor[left] = 50;
+	}
+	while(SensorValue[rightencoder] > SensorValue[leftencoder] )
+	{
+		motor[left] = 50;
+		motor[right] = 30;
+	}
+	while(SensorValue[rightencoder] < SensorValue[leftencoder] )
+	{
+		motor[left] = 30;
+		motor[right] = 50;
+	}
+}      
+}
+
 task main()
 {
 
