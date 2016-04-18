@@ -93,7 +93,7 @@ void turn(int dir, int num){
 	
 }
 
-oid goStraight(int dist){
+void goStraight(int dist){
 	
 	float a = 5.7;
 	float k = .79;
@@ -130,7 +130,8 @@ oid goStraight(int dist){
 
 void goStraighter(int dist)
 {
- while(SensorValue[rightencoder] < dist && SensorValue[leftencoder] < dist)
+float a = 5.7;
+ while(SensorValue[rightencoder] < dist * a && SensorValue[leftencoder] < dist * a)
 {
 	while(SensorValue[rightencoder] == SensorValue[leftencoder] )
 	{
