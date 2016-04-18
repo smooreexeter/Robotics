@@ -64,7 +64,7 @@ void turn(int dir, int num){
 		
 		if(dir < 0){
 			
-			int k = 330; //too big
+			int k = 250; //too big
 
 			while(SensorValue[rightEncoder] < k){
 				motor[leftMotor] = -80;
@@ -75,7 +75,7 @@ void turn(int dir, int num){
 		
 		}else{
 		
-			int k = 330;
+			int k = 250;
 
 			while(SensorValue[rightEncoder] > -k){
 				motor[leftMotor] = 80;
@@ -83,7 +83,6 @@ void turn(int dir, int num){
 			}
 			motor[leftMotor] = 0;
 			motor[rightMotor] = 0;
-		
 		}
 		
 		SensorValue[rightEncoder] = 0;
@@ -96,7 +95,7 @@ void turn(int dir, int num){
 void goStraight(int dist){
 	
 	float a = 5.7;
-	float k = .79;
+	float k = 0.79;
 	//rampUp(0, 65, k, 1);
 	int R = 40;
 	//float g = 1;
@@ -130,25 +129,31 @@ void goStraight(int dist){
 
 void goStraighter(int dist)
 {
-float a = 5.7;
+float a = 4.6;
  while(SensorValue[rightencoder] < dist * a && SensorValue[leftencoder] < dist * a)
 {
 	while(SensorValue[rightencoder] == SensorValue[leftencoder] )
 	{
-		motor[right] = 50;
-		motor[left] = 50;
+		motor[rightMotor] = 40;
+		motor[leftMotor] = 40;
+		wait(250);
 	}
 	while(SensorValue[rightencoder] > SensorValue[leftencoder] )
 	{
-		motor[left] = 50;
-		motor[right] = 30;
+		motor[leftMotor] = 40;
+		motor[rightMotor] = 30;
+		wait(250);
 	}
 	while(SensorValue[rightencoder] < SensorValue[leftencoder] )
 	{
-		motor[left] = 30;
-		motor[right] = 50;
+		motor[leftMotor] = 30;
+		motor[rightMotor] = 40;
+		wait(250);
 	}
-}      
+}
+SensorValue[leftEncoder] = 0;
+SensorValue[rightEncoder] = 0;
+wait(1000);
 }
 
 task main()
@@ -164,7 +169,9 @@ task main()
 	wait(1000);
 	turn(1, 2);
 	*/
-	goStraight(200);
+	//goStraighter(200);
+	turn(1,2);
+	//goStraighter(200);
 	/*
 	wait(1000);
 	turn(-1, 2);
