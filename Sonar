@@ -44,94 +44,86 @@ void forwardForDistance(int dist){
 
 }
 
-void reverseForDistance(int dist){
+int reverseForDistance(int dist){
+
+	SensorValue[rightEncoder] = 0;
 
 	float a = -5.8;
 	float k = 1.1;
-	rampUp(0, 65, k, -1);
+	rampUp(0, 40, k, -1);
 	while(SensorValue[rightEncoder] > dist*a){
-		motor[leftMotor] = -65;
-		motor[rightMotor] = -65 * k;
+		motor[leftMotor] = -40;
+		motor[rightMotor] = -40 * k;
 	}
-
-	SensorValue[rightEncoder] = 0;
+	
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+	
+	return SensorValue[rightEncoder];
+	
+	//SensorValue[rightEncoder] = 0;
 
 }
 
 void turn(int dir, int num){
 	//left turn  = -1, right turn = 1
+	int speed = 50;
 	for(int i  = 0; i < num; i++){
 
 		if(dir < 0){
+				
+			SensorValue[rightEncoder] = 0;
+			SensorValue[leftEncoder] = 0;
 
-			int k = 250; //too big
+
+			int k = 180; //too big
 
 			while(SensorValue[rightEncoder] < k){
-				motor[leftMotor] = -80;
-				motor[rightMotor] = 80;
+				motor[leftMotor] = -speed;
+				motor[rightMotor] = speed;
 			}
 			motor[leftMotor] = 0;
 			motor[rightMotor] = 0;
 
 		}else{
+		
+			SensorValue[rightEncoder] = 0;
+			SensorValue[leftEncoder] = 0;
 
-			int k = 250;
+
+			int k = 180;
 
 			while(SensorValue[rightEncoder] > -k){
-				motor[leftMotor] = 80;
-				motor[rightMotor] = -80;
+				motor[leftMotor] = speed;
+				motor[rightMotor] = -speed;
 			}
 			motor[leftMotor] = 0;
 			motor[rightMotor] = 0;
 		}
 
-		SensorValue[rightEncoder] = 0;
+		
 		wait(1000);
+		SensorValue[rightEncoder] = 0;
+		SensorValue[leftEncoder] = 0;
 
 	}
 
 }
 
-void rightTurn90()
-{
-	int k = 170;
-
-	while(SensorValue[rightEncoder] > -k)
-	{
-		motor[rightMotor] = -80;
-		motor[leftMotor] = 80;
-	}
-	motor[rightMotor] =0;
-	motor[leftMotor] = 0;
-
-	SensorValue[rightEncoder] = 0;
-	wait(1000);
-}
-
-void rightTurn180()
-{
-	int k = 328;
-
-	while(SensorValue[rightEncoder] > -k)
-	{
-		motor[rightMotor] = -80;
-		motor[leftMotor] = 80;
-	}
-	motor[rightMotor] =0;
-	motor[leftMotor] = 0;
-
-	SensorValue[rightEncoder] = 0;
-	wait(1000);
-}
 
 void leftTurn90()
 {
-	int k = 193;
+	
+
+	SensorValue[rightEncoder] = 0;
+	SensorValue[leftEncoder] = 0;
+
+	int k = 175;
 
 	while(SensorValue[rightEncoder] < k)
 	{
-		motor[rightMotor] = 80;
-		motor[leftMotor] = -80;
+		motor[rightMotor] = 40;
+		motor[leftMotor] = -40;
 	}
 	motor[rightMotor] =0;
 	motor[leftMotor] = 0;
@@ -143,12 +135,14 @@ void leftTurn90()
 void leftTurn180()
 {
 	SensorValue[rightEncoder] = 0;
-	int k = 330;
+	SensorValue[leftEncoder] = 0;
+
+	int k = 370;
 
 	while(SensorValue[rightEncoder] < k)
 	{
-		motor[rightMotor] = 80;
-		motor[leftMotor] = -80;
+		motor[rightMotor] = 40;
+		motor[leftMotor] = -40;
 	}
 	motor[rightMotor] =0;
 	motor[leftMotor] = 0;
@@ -157,40 +151,6 @@ void leftTurn180()
 	wait(1000);
 }
 
-void goStraight(int dist){
-
-	float a = 5.7;
-	float k = 0.79;
-	//rampUp(0, 65, k, 1);
-	int R = 40;
-	//float g = 1;
-	int RE = 0;
-	int LE = 0;
-
-	//SensorValue[leftEncoder] = 10;
-	//SensorValue[rightEncoder] = 10;
-
-	while(SensorValue[rightEncoder] < dist * a  && SensorValue[leftEncoder] < dist * a){
-
-		motor[leftMotor] = 40;
-		motor[rightMotor] = R;
-		LE = SensorValue[leftEncoder];
-		RE = SensorValue[rightEncoder];
-		//if(RE > 1){
-	  	R = R * (LE + 1) / (RE + 1);
-		//} else{
-		//	R = 40;
-		//}
-		wait(500);
-
-	}
-
-	//SensorValue[leftEncoder] = 0;
-	//SensorValue[rightEncoder] = 0;
-	motor[leftMotor] = 0;
-	motor[rightMotor] = 0;
-
-}
 
 int goStraighter(int dist, int encoder)
 {
@@ -233,12 +193,27 @@ int goStraighter(int dist, int encoder)
 
 int forwardUntilAway(int dist){
 	int ret;
-	while(SensorValue[sonar] > dist + 8){
+	while(SensorValue[sonar] > dist + 8 || !SensorValue[sonar] == 616){
 		ret += goStraighter(2, -1);
 	}
 	
 	return ret;
 		
+}
+
+int forwardHit(){
+	SensorValue[leftEncoder] = 0;
+	SensorValue[rightEncoder] = 0;
+
+	while(!SensorValue[sonar] <= 4){
+		motor[leftMotor] = 40;
+		motor[rightMotor] = 40;
+	}
+	
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+	
+	return SensorValue[rightEncoder];
 }
 
 
@@ -247,36 +222,48 @@ void navMaze(){
 	
 	int dir[10];
 	
-	bool end = false;
+	int end = 0;
 	int index = 0;
 	
-	while(!end){
-		dir[index] = forwardUntilAway(34);
+	while(end == 0){
+		SensorValue[leftEncoder] = 0;
+		SensorValue[rightEncoder] = 0;
+		dir[index] = forwardUntilAway(29);
 		wait(1000);
 		leftTurn90();
-		if(SensorValue[sonar] < 70){
+		//turn(-1,1);
+		if(SensorValue[sonar] < 60){
 			wait(1000);
-			rightTurn180();
+			leftTurn180();
+			//turn(-1,2);
 			dir[index] = dir[index] * -1;
 			if(SensorValue[sonar] < 70){ 
-				end = true;
+				end = index;
 			}
 		}
 		index++;
 	}
+	index--;
 	wait(1000);
-	//leftTurn90();
+	leftTurn90();
 	wait(500);
-	//forwardUntilAway(5);
-	rightTurn90();
+	dir[index] += forwardHit();
+	wait(250);
+	
+	dir[index] -= reverseForDistance(20);
+	wait(500);
+	leftTurn180();
 	
 	while(index >= 0){
-		goStraighter(0, abs(dir[index]));
-		if(sgn(dir[index]) == -1){
-			leftTurn90();
-		}else{
-			rightTurn90();
+		if(index != end){
+			if(sgn(dir[index]) == -1){
+				leftTurn90();
+			}else{
+				turn(1,1);
+			}
 		}
+		wait(500);
+		goStraighter(0, abs(dir[index]));
 		index--;
 	}
 }
