@@ -17,7 +17,8 @@ void rampUp(int length, int targetSpeed, float fac, int dir){
 		//a multiplier to keep the wheels straight, and direction (1 goes forward, -1 backwards))
 
 	if(length == 0){
-		length  = 30; //essentially setting a default length
+		//sets a default interval
+		length  = 30; 
 	}
 	int time = length;
 	int speed = 20;
