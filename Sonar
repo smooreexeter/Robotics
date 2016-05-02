@@ -10,10 +10,13 @@ void wait(int val){
 	wait1Msec(val);
 }
 
+//rampUp is used to slowly speed up the motors so the wheels don't spin
 void rampUp(int length, int targetSpeed, float fac, int dir){
+		//(length of time between speed changes, desired final speed,
+		//a multiplier to keep the wheels straight, and direction (1 goes forward, -1 backwards))
 
 	if(length == 0){
-		length  = 30;
+		length  = 30; //essentially setting a default length
 	}
 	int time = length;
 	int speed = 20;
@@ -30,20 +33,6 @@ void rampUp(int length, int targetSpeed, float fac, int dir){
 
 }
 
-void forwardForDistance(int dist){
-
-	float a = 5.7;
-	float k = .79;
-	rampUp(0, 65, k, 1);
-	while(SensorValue[rightEncoder] < dist*a){
-		motor[leftMotor] = 65;
-		motor[rightMotor] = 65 * k;
-	}
-
-	SensorValue[rightEncoder] = 0;
-
-}
-
 int reverseForDistance(int dist, int enc){
 
 	wait(1000);
@@ -51,12 +40,14 @@ int reverseForDistance(int dist, int enc){
 	SensorValue[rightEncoder] = 0;
 	SensorValue[leftEncoder] = 0;
 
+	//constants so that dist is in cm
 	float a = -5.8;
 	float k = 1.1;
 	rampUp(0, 25, k, -1);
 	
 	int num = dist * a;
 	
+	//if enc is set to a value (meaning that we want to specify distance in degrees), this overrides dist
 	if(enc > 0){
 		num = -enc;
 	}
@@ -75,22 +66,28 @@ int reverseForDistance(int dist, int enc){
 	
 	return ret;
 	
-	//SensorValue[rightEncoder] = 0;
 
 }
 
 void turn(int dir, int num){
-	//left turn  = -1, right turn = 1
+	//left turn: dir = -1, right turn: dir = 1; num specifies number of turns (1 = 90deg turn, 2 = 180deg, etc.)
+	
+	//we were having trouble getting these turns to be consistent, so we switched to using separate methods for left turns
+	//and only used this when making right turns
+	
 	int speed = 50;
+	
+	//repeats depending on num
 	for(int i  = 0; i < num; i++){
 
+		//right turn
 		if(dir < 0){
 				
 			SensorValue[rightEncoder] = 0;
 			SensorValue[leftEncoder] = 0;
 
 
-			int k = 180; //too big
+			int k = 180;
 
 			while(SensorValue[rightEncoder] < k){
 				motor[leftMotor] = -speed;
@@ -98,7 +95,8 @@ void turn(int dir, int num){
 			}
 			motor[leftMotor] = 0;
 			motor[rightMotor] = 0;
-
+			
+		//left turn
 		}else{
 		
 			SensorValue[rightEncoder] = 0;
@@ -166,34 +164,39 @@ void leftTurn180()
 }
 
 
-int goStraighter(int dist, int encoder)
-{
+int goStraighter(int dist, int encoder){
+	//this is our go straight function (so named because it went straigher than our "goStraight" function)
+
+	//a is a constant to convert cm to encoder values
 	float a = 4.6;
 	int ret;
 	
-	//SensorValue[leftEncoder] = 0;
-	//SensorValue[rightEncoder] = 0;
-	int lEnc = SensorValue[leftEncoder];
-	int rEnc = SensorValue[rightEncoder];
-	
+	//converting distance to an encoder value
 	int num = dist * a
+	
+	//once again, if there is a value for encoder, we override the distance value
 	if(encoder > 0){
 		num = encoder;
 	}
- while(SensorValue[rightencoder] < num + rEnc && SensorValue[leftencoder] < num + lEnc)
-	{
+	
+	//while both encoders are less than the final encoder value
+	while(SensorValue[rightencoder] < num + rEnc && SensorValue[leftencoder] < num + lEnc){
+		
+		//goes straight if the encoders are equal
 		while(SensorValue[rightencoder] == SensorValue[leftencoder] )
 		{
 			motor[rightMotor] = 40 * 0.79;
 			motor[leftMotor] = 40;
 			wait(10);
 		}
+		//turns slight right if it is drifting to the left
 		while(SensorValue[rightencoder] > SensorValue[leftencoder] )
 		{
 			motor[leftMotor] = 40;
 			motor[rightMotor] = 30;
 			wait(10);
 		}
+		//turns slight left if it is drifting to the right
 		while(SensorValue[rightencoder] < SensorValue[leftencoder] )
 		{
 			motor[leftMotor] = 30;
@@ -204,26 +207,34 @@ int goStraighter(int dist, int encoder)
 	motor[rightMotor] = 0;
 	motor[leftMotor] = 0;
 	ret = SensorValue[leftEncoder];
-	//SensorValue[leftEncoder] = 0;
-	//SensorValue[rightEncoder] = 0;
-	//wait(1000);
+	
+	//In case we want to return the actual distance covered
 	return ret;
 }
 
 int forwardUntilAway(int dist){
+	//dist is in cm
+
 	int ret;
+	
+	//while the sonar is reading a value slightly larger than the target (to account for inertia) and when it 
+	//isn't reading a very large value (we found this tended to happen when the sensor was pushed against a wall
 	while(SensorValue[sonar] > dist + 8 && SensorValue[sonar] <= 600){
 		goStraighter(2, -1);
 	}
 	
+	//returns the distance the robot traveled 
 	return SensorValue[leftEncoder];
 		
 }
 
 int forwardHit(){
+	//used when hitting the final wall
+
 	SensorValue[leftEncoder] = 0;
 	SensorValue[rightEncoder] = 0;
 
+	//we found that at 4cm away the robot would continue to roll forward and hit the wall
 	while(SensorValue[sonar] >= 4 && SensorValue[sonar] <= 600){
 		motor[leftMotor] = 40;
 		motor[rightMotor] = 40;
@@ -234,45 +245,68 @@ int forwardHit(){
 	
 	wait(500);
 	
+	//returns the distance to the wall so that we can back up the same amount
 	return SensorValue[rightEncoder];
 }
 
 
 
 void navMaze(){
+	//the one function which runs the maze
 	
+	//sets up our array to navigate back
 	int dir[10];
 	
+	//variables used in getting back
 	int end = 0;
 	int index = 0;
 	
+	//end is set to a nonzero value once the robot finds the end
 	while(end == 0){
+		//starts by zeroing encoders
 		SensorValue[leftEncoder] = 0;
 		SensorValue[rightEncoder] = 0;
+		
+		//29 cm was just enough to get our robot around corners and not hit the wall it sensed
 		forwardUntilAway(29);
+		
+		//sets the array value at the index to be the distance traveled
 		dir[index] = SensorValue[leftEncoder];
 		wait(1000);
+		
 		leftTurn90();
-		//turn(-1,1);
+		
+		//if there is another wall detected
 		if(SensorValue[sonar] < 60){
 			wait(1000);
 			leftTurn180();
-			//turn(-1,2);
+			
+			//if it needs to do a right turn, we set the array value to be negative; this is then used to 
+			//turn when navigating out
 			dir[index] = dir[index] * -1;
+			
+			//if there is still a wall, we are at the end and index is 
 			if(SensorValue[sonar] < 70){ 
 				end = index;
 			}
 		}
+		
+		//advances the index for the next iteration
 		index++;
 	}
+	//since we want to access the most recent array value and index was just increased, we decrease it again
 	index--;
 	wait(1000);
+	
+	//reorient the robot to face the final wall
 	leftTurn90();
 	wait(500);
 	
+	//forwardhit returns encoder values to the wall
 	int f = forwardHit();
 	wait(250);
 	
+	//back up the same distance forwardhit traveled
 	reverseForDistance(0, f);
 	wait(500);
 	leftTurn180();
@@ -280,21 +314,36 @@ void navMaze(){
 	SensorValue[leftEncoder] = 0;
 	SensorValue[rightEncoder] = 0;
 	
+	//when index is less than 0, the robot has completed all the steps it made going in
 	while(index >= 0){
+		
+		//zeroing encoders
 		SensorValue[leftEncoder] = 0;
 		SensorValue[rightEncoder] = 0;
+		
+		//when we finished the maze, end was set to index. At this point we are facing away from the last wall and
+		//don't want to turn again
 		if(index != end){
+		
+			//if the distance is negative, it was a right turn, so we need to turn left when going in reverse
 			if(sgn(dir[index]) == -1){
 				leftTurn90();
+				
+			//otherwise turn right
 			}else{
 				turn(1,1);
 			}
 		}
+		
 		SensorValue[leftEncoder] = 0;
 		SensorValue[rightEncoder] = 0;
 		wait(1000);
+		
+		//go forward for the absolute value of the distance so that it isn't confused by the negative numbers
 		goStraighter(0, abs(dir[index]));
 		wait(500);
+		
+		//decrease the index to complete the next step in the maze
 		index--;
 	}
 }
@@ -306,8 +355,9 @@ void navMaze(){
 
 task main()
 {
-
+	//waits for the button to be pressed
 	while(SensorValue[bump] == 1){}
-	//int f = forwardHit();
+	
+	//navigates the maze
 	navMaze();
 }
