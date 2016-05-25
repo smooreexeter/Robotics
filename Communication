@@ -15,6 +15,10 @@ void wait(int var){
 	wait1Msec(var);
 }
 
+int numTurns = 10;
+Stack st[10];
+int dir[10];
+
 
 bool push(Stack stack, int val){
 	if(stack.size == 16){
@@ -63,10 +67,56 @@ void stackOut(Stack st){
 }
 
 
+void navMaze(){
+
+}
+
+void com(){
+
+	
+	for(int i = 0; i < numTurns; i++){
+		createBinary(st[i], abs(dir[i]));
+	}
+	
+	SensorValue[dOut] = 1;
+	wait(1000);
+	SensorValue[dOut] = 0;
+	wait(500);
+	
+	int temp;
+	
+	for(int i = 0; i < numTurns; i++){
+		for(int j = 0; j < st.size; j++){
+			temp = pop(st[i]);
+			if(temp == 0){
+				wait(10);
+			}else{
+				SensorValue[dOut] = 1;
+				wait(10);
+				SensorValue[dOut] = 0;
+			}
+			wait(5);
+		}
+		if(sgn(dir[i]) == 1){
+			SensorValue[dOut] = 1;
+			wait(100);
+			SensorValue[dOut] = 0;
+			wait(250);
+		}else{
+			SensorValue[dOut] = 1;
+			wait(200);
+			SensorValue[dOut] = 0;
+			wait(250);
+		}
+	}
+}
+		
+
 
 task main(){
 	Stack st[5];
 
+	
 	createBinary(st[0], 8000);
 	createBinary(st[1], 5000);
 	
