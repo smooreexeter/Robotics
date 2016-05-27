@@ -88,7 +88,7 @@ void leftTurn90()
 	SensorValue[rightEncoder] = 0;
 	SensorValue[leftEncoder] = 0;
 
-	int k = 270;
+	int k = 260;
 
 	while(SensorValue[rightEncoder] < k)
 	{
@@ -116,7 +116,7 @@ void leftTurn180()
 		SensorValue[rightEncoder] = 0;
 	SensorValue[leftEncoder] = 0;
 
-	int k = 540;
+	int k = 550;
 
 	while(SensorValue[rightEncoder] < k)
 	{
@@ -235,6 +235,34 @@ int forwardHit(){
 	return SensorValue[rightEncoder];
 }
 
+void navToLine(){
+	
+	int thresh = 2200;
+	
+	while(SensorValue[lLine] < thresh && SensorValue[rlLine] < thresh){
+		goStraighter(2,1);
+	}
+		
+	if(SensorValue[lLine] < thresh && SensorValue[rlLine] > thresh){
+		while(SensorValue[lLine] < thresh){
+			motor[leftMotor] = 40;
+		}
+		motor[leftMotor] = 0;
+	}else if(SensorValue[rlLine] < thresh && SensorValue[lLine] > thresh){
+		while(SensorValue[rlLine] < thresh){
+			motor[rightMotor] = 40;
+		}
+		motor[rightMotor] = 0;
+	}
+		
+	int pos = -1;
+	
+	while(SensorValue[lLine] > thresh){
+		goStraighter(1,1);
+	}
+}
+
+
 
 
 void navMaze(){
@@ -336,54 +364,7 @@ void navMaze(){
 		index--;
 	}
 	
-	while(SensorValue[lLine] < 2100 && SensorValue[rlLine] > 2100){
-		goStraighter(2,1);
-	}
-		
-	if(SensorValue[lLine] < 2100 && SensorValue[rlLine] > 2100){
-		while(SensorValue[lLine] < 2100){
-			motor[leftMotor] = 30;
-		}
-	}else if(SensorValue[rlLine] < 2100 && SensorValue[lLine] > 2100){
-		while(SensorValue[rlLine] < 2100){
-			motor[rightMotor] = 30;
-		}
-	}
-		
-	int pos = -1;
-	
-	while(SensorValue[lLine] > 2100){
-		goStraighter(1,1);
-	}
-	/*
-	if(SensorValue[lLine] > lineThresh){
-		forwardUntilAway(4);
-		pos = 0;
-	}else{
-		goStraighter(1,1);
-		if(SensorValue[lLine] > lineThresh){
-			forwardUntilAway(4);
-			pos = 1;
-		}else{
-			goStraighter(1,1);
-			if(SensorValue[lLine] > lineThresh){
-				forwardUntilAway(4);
-				pos = 2;
-			}else{
-				goStraighter(1,1);
-				if(SensorValue[lLine] > lineThresh){
-					forwardUntilAway(4);
-					pos = 3;
-				}else{
-					goStraighter(1,1);
-					if(SensorValue[lLine] > lineThresh){
-						forwardUntilAway(4);
-						pos = 4;
-					}
-				}
-			}
-		}
-	}	*/
+	navToLine();
 
 	
 }
@@ -403,9 +384,10 @@ void navMaze(){
 
 
 
-int numTurns = 10;
-Stack st[10];
-int dir[10];
+
+	int numTurns = 2;
+	Stack st[2];
+	int dir[2];
 
 
 bool push(Stack stack, int val){
@@ -456,15 +438,14 @@ void stackOut(Stack st){
 
 
 void com(){
-
 	
 	for(int i = 0; i < numTurns; i++){
 		createBinary(st[i], abs(dir[i]));
 	}
 	
-	SensorValue[dOut] = 1;
-	wait(1000);
 	SensorValue[dOut] = 0;
+	wait(1000);
+	SensorValue[dOut] = 1;
 	wait(500);
 	
 	int temp;
@@ -475,21 +456,21 @@ void com(){
 			if(temp == 0){
 				wait(10);
 			}else{
-				SensorValue[dOut] = 1;
-				wait(10);
 				SensorValue[dOut] = 0;
+				wait(10);
+				SensorValue[dOut] = 1;
 			}
 			wait(5);
 		}
 		if(sgn(dir[i]) == 1){
-			SensorValue[dOut] = 1;
-			wait(50);
 			SensorValue[dOut] = 0;
-			wait(250);
+			wait(20);
+			SensorValue[dOut] = 1;
+			wait(280);
 		}else{
-			SensorValue[dOut] = 1;
-			wait(10);
 			SensorValue[dOut] = 0;
+			wait(10);
+			SensorValue[dOut] = 1;
 			wait(290);
 		}
 	}
@@ -499,7 +480,7 @@ void com(){
 
 task main(){
 	
-	
+	/*
 	SensorValue[lLine] = 0;
 	SensorValue[rlLine] = 0;
 	SensorValue[rrLine] = 0;
@@ -507,6 +488,12 @@ task main(){
 	while(SensorValue[bump] == 1){}
 	
 	navMaze();
+	*/
+	
+	dir[0] = 5000;
+	dir[1] = 6000;
+	
+	com();
 	
 
 }
