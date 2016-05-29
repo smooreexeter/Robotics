@@ -381,10 +381,6 @@ void navMaze(){
 
 
 
-
-
-
-
 	int numTurns = 2;
 	Stack st[2];
 	int dir[2];
@@ -437,24 +433,26 @@ void stackOut(Stack st){
 }
 
 
+
 void com(){
-	
 	for(int i = 0; i < numTurns; i++){
 		createBinary(st[i], abs(dir[i]));
 	}
 	
-	SensorValue[dOut] = 0;
-	wait(1000);
-	SensorValue[dOut] = 1;
-	wait(500);
-	
 	int temp;
 	
+	SensorValue[dOut] = 0;
+	wait(500);
+	SensorValue[dOut] = 1
+	wait(5);
+	
 	for(int i = 0; i < numTurns; i++){
-		for(int j = 0; j < st.size; j++){
+		while(st[i].size > 0){
 			temp = pop(st[i]);
 			if(temp == 0){
-				wait(10);
+				SensorValue[dOut] = 0;
+				wait(20);
+				SensorValue[dOut] = 1;
 			}else{
 				SensorValue[dOut] = 0;
 				wait(10);
@@ -464,16 +462,29 @@ void com(){
 		}
 		if(sgn(dir[i]) == 1){
 			SensorValue[dOut] = 0;
-			wait(20);
+			wait(40);
 			SensorValue[dOut] = 1;
-			wait(280);
 		}else{
 			SensorValue[dOut] = 0;
-			wait(10);
+			wait(30);
 			SensorValue[dOut] = 1;
-			wait(290);
 		}
+		
+		wait(5);
+		
+		
+		if(i == numTurns - 1){
+			SensorValue[dOut] = 0;
+			wait(500);
+			SensorValue[dOut] = 1;
+		}else{
+			SensorValue[dOut] = 0;
+			wait(50);
+			SensorValue[dOut] = 1;
+		}
+			
 	}
+	
 }
 		
 
@@ -493,7 +504,8 @@ task main(){
 	dir[0] = 5000;
 	dir[1] = 6000;
 	
-	com();
+	while(SensorValue[bump] == 1){}
 	
+	com();
 
 }
