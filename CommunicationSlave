@@ -367,7 +367,7 @@ void navMaze(){
 
 
 
-
+int gaveStop = 0;
 int numTurns = 10;
 int testVal = 0;
 Stack st[10];
@@ -484,25 +484,28 @@ int binaryToInt(int i){
 }
 */
 
+
 int binaryToInt(Stack tempStack){
 	int ret = 0;
 	int power = tempStack.size;
+	int originalPower = tempStack.size;
 	int popVal;
 	int tempPowVal = 0;
 	stat = 200 + tempStack.size;
 	while(tempStack.size > 0){
 		popVal = pop(tempStack);
 		if(popVal == 1){
-			tempPowVal = pow(2, power);
+			tempPowVal = pow(2, originalPower - power);
 			ret += tempPowVal;
 		}
 		power--;
 		
-		stat = 10000 + ret;
-		return ret;
+		
+	stat = 200 + tempStack.size;
 	}
 	
-	return 1;
+	stat = 10000 + ret;
+	return ret;
 	
 }
 
@@ -510,6 +513,7 @@ void recCom(){
 	bool stillCom = true;
 	bool sameNum = true;
 	int time = 0;
+	int timeTemp = 0;
 	int tempOutput;
 	
 	for(int i = 0; i < 10; i++){
@@ -530,10 +534,18 @@ void recCom(){
 					neg[i] = true;
 				}else if(time < 51 && time > 49){
 					sameNum = false;
-				}else if(time < 501 && time > 499){
-					testVal = 4440 + i;
-					stillCom = false;
+					while(SensorValue[din] == 1){}
+					clearTimer(T2);
+					while(SensorValue[din] == 0){}
+					timeTemp = time1(T2);
+					if(timeTemp < 61 && timeTemp > 59){
+					}else if(timeTemp < 501 && timeTemp > 499){
+						testVal = 4440 + i;
+						stillCom = false;
+						gaveStop = i;
+					}
 				}
+				
 			}
 			stat = 100 + i;
 			tempOutput = binaryToInt(st[i]);
@@ -563,6 +575,6 @@ task main(){
 	}
 	*/
 	recCom();
-	//testVal = dir[0];
+	if(dir[0] != 0){testVal = dir[0];}
 
 }
