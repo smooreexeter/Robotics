@@ -447,6 +447,11 @@ void com(){
 	wait(5);
 	
 	for(int i = 0; i < numTurns; i++){
+		SensorValue[dOut] = 0;
+		wait(60);
+		SensorValue[dOut] = 1;
+		wait(5);
+	
 		while(st[i].size > 0){
 			temp = pop(st[i]);
 			if(temp == 0){
@@ -473,17 +478,16 @@ void com(){
 		wait(5);
 		
 		
-		if(i == numTurns - 1){
-			SensorValue[dOut] = 0;
-			wait(500);
-			SensorValue[dOut] = 1;
-		}else{
-			SensorValue[dOut] = 0;
-			wait(50);
-			SensorValue[dOut] = 1;
-		}
+		
+		SensorValue[dOut] = 0;
+		wait(50);
+		SensorValue[dOut] = 1;
+		wait(10);
 			
 	}
+	SensorValue[dOut] = 0;
+	wait(500);
+	SensorValue[dOut] = 1;
 	
 }
 		
@@ -502,7 +506,7 @@ task main(){
 	*/
 	
 	dir[0] = 5000;
-	dir[1] = 6000;
+	dir[1] = -6000;
 	
 	while(SensorValue[bump] == 1){}
 	
